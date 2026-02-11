@@ -22,7 +22,7 @@ public class UpdateTaskCommand implements Command {
         }
 
         // Create a new task with updated priority (tasks are immutable)
-        Task updated = new Task(existing.getName(), newPriority);
+        Task updated = new Task(existing.name(), newPriority);
         registry.add(updated);  // This replaces the old task
     }
 }

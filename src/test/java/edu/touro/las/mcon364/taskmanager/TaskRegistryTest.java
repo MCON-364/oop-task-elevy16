@@ -38,7 +38,7 @@ class TaskRegistryTest {
         registry.add(task2);
 
         Task retrieved = registry.get("Test task");
-        assertEquals(Priority.HIGH, retrieved.getPriority(), "Second task should replace first");
+        assertEquals(Priority.HIGH, retrieved.priority(), "Second task should replace first");
     }
 
     @Test

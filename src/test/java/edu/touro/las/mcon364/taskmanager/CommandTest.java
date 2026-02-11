@@ -39,7 +39,7 @@ class CommandTest {
         new AddTaskCommand(registry, originalTask).execute();
         new AddTaskCommand(registry, replacementTask).execute();
 
-        assertEquals(Priority.HIGH, registry.get("Task").getPriority(),
+        assertEquals(Priority.HIGH, registry.get("Task").priority(),
                 "Replacement task should have new priority");
     }
 
@@ -73,7 +73,7 @@ class CommandTest {
 
         Task updated = registry.get("Update me");
         assertNotNull(updated, "Task should still exist after update");
-        assertEquals(Priority.HIGH, updated.getPriority(), "Priority should be updated to HIGH");
+        assertEquals(Priority.HIGH, updated.priority(), "Priority should be updated to HIGH");
     }
 
     @Test
@@ -85,7 +85,7 @@ class CommandTest {
         command.execute();
 
         Task updated = registry.get("Important task");
-        assertEquals("Important task", updated.getName(), "Task name should be preserved");
+        assertEquals("Important task", updated.name(), "Task name should be preserved");
     }
 
     @Test
@@ -109,7 +109,7 @@ class CommandTest {
 
         new UpdateTaskCommand(registry, "Flexible", Priority.LOW).execute();
 
-        assertEquals(Priority.LOW, registry.get("Flexible").getPriority(),
+        assertEquals(Priority.LOW, registry.get("Flexible").priority(),
                 "Should allow decreasing priority");
     }
 
@@ -120,7 +120,7 @@ class CommandTest {
 
         new UpdateTaskCommand(registry, "Urgent", Priority.HIGH).execute();
 
-        assertEquals(Priority.HIGH, registry.get("Urgent").getPriority(),
+        assertEquals(Priority.HIGH, registry.get("Urgent").priority(),
                 "Should allow increasing priority");
     }
 }

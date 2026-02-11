@@ -42,7 +42,7 @@ public class DemoMain {
         System.out.println("\n2. Retrieving a specific task...");
         Task retrieved = registry.get("Fix critical bug");
         if (retrieved != null) {
-            System.out.println("   Found: " + retrieved.getName() + " (Priority: " + retrieved.getPriority() + ")");
+            System.out.println("   Found: " + retrieved.name() + " (Priority: " + retrieved.priority() + ")");
         } else {
             System.out.println("   Task not found");
         }
@@ -90,7 +90,7 @@ public class DemoMain {
     private void displayAllTasks() {
         System.out.println("\n   Current tasks in registry:");
         registry.getAll().forEach((name, task) ->
-            System.out.println("     - " + name + " (Priority: " + task.getPriority() + ")")
+            System.out.println("     - " + name + " (Priority: " + task.priority() + ")")
         );
     }
 }

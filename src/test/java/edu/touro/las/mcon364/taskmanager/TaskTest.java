@@ -16,8 +16,8 @@ class TaskTest {
     void testTaskCreation() {
         Task task = new Task("Test task", Priority.HIGH);
 
-        assertEquals("Test task", task.getName(), "Task name should match");
-        assertEquals(Priority.HIGH, task.getPriority(), "Task priority should match");
+        assertEquals("Test task", task.name(), "Task name should match");
+        assertEquals(Priority.HIGH, task.priority(), "Task priority should match");
     }
 
     @Test
@@ -71,9 +71,9 @@ class TaskTest {
         Task mediumTask = new Task("Medium", Priority.MEDIUM);
         Task highTask = new Task("High", Priority.HIGH);
 
-        assertEquals(Priority.LOW, lowTask.getPriority());
-        assertEquals(Priority.MEDIUM, mediumTask.getPriority());
-        assertEquals(Priority.HIGH, highTask.getPriority());
+        assertEquals(Priority.LOW, lowTask.priority());
+        assertEquals(Priority.MEDIUM, mediumTask.priority());
+        assertEquals(Priority.HIGH, highTask.priority());
     }
 }
 

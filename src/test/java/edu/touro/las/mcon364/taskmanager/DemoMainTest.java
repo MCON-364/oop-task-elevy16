@@ -51,23 +51,23 @@ class DemoMainTest {
         // Verify specific tasks exist with correct priorities
         Task doc = testRegistry.get("Write documentation");
         assertNotNull(doc, "Write documentation task should exist");
-        assertEquals(Priority.HIGH, doc.getPriority(), "Write documentation should be HIGH priority");
+        assertEquals(Priority.HIGH, doc.priority(), "Write documentation should be HIGH priority");
 
         Task review = testRegistry.get("Review pull requests");
         assertNotNull(review, "Review pull requests task should exist");
-        assertEquals(Priority.MEDIUM, review.getPriority(), "Review pull requests should be MEDIUM priority");
+        assertEquals(Priority.MEDIUM, review.priority(), "Review pull requests should be MEDIUM priority");
 
         Task dependencies = testRegistry.get("Update dependencies");
         assertNotNull(dependencies, "Update dependencies task should exist");
-        assertEquals(Priority.LOW, dependencies.getPriority(), "Update dependencies should be LOW priority");
+        assertEquals(Priority.LOW, dependencies.priority(), "Update dependencies should be LOW priority");
 
         Task bug = testRegistry.get("Fix critical bug");
         assertNotNull(bug, "Fix critical bug task should exist");
-        assertEquals(Priority.HIGH, bug.getPriority(), "Fix critical bug should be HIGH priority");
+        assertEquals(Priority.HIGH, bug.priority(), "Fix critical bug should be HIGH priority");
 
         Task refactor = testRegistry.get("Refactor code");
         assertNotNull(refactor, "Refactor code task should exist");
-        assertEquals(Priority.MEDIUM, refactor.getPriority(), "Refactor code should be MEDIUM priority");
+        assertEquals(Priority.MEDIUM, refactor.priority(), "Refactor code should be MEDIUM priority");
     }
 
     @Test
@@ -85,8 +85,8 @@ class DemoMainTest {
 
         // Verify
         assertNotNull(retrieved, "Retrieved task should not be null");
-        assertEquals("Fix critical bug", retrieved.getName(), "Task name should match");
-        assertEquals(Priority.HIGH, retrieved.getPriority(), "Task priority should match");
+        assertEquals("Fix critical bug", retrieved.name(), "Task name should match");
+        assertEquals(Priority.HIGH, retrieved.priority(), "Task priority should match");
         assertEquals(expectedTask, retrieved, "Retrieved task should equal the added task");
     }
 
@@ -111,7 +111,7 @@ class DemoMainTest {
 
         // Verify original priority
         Task before = testRegistry.get("Refactor code");
-        assertEquals(Priority.MEDIUM, before.getPriority(), "Initial priority should be MEDIUM");
+        assertEquals(Priority.MEDIUM, before.priority(), "Initial priority should be MEDIUM");
 
         // Update to HIGH priority
         testManager.run(new UpdateTaskCommand(testRegistry, "Refactor code", Priority.HIGH));
@@ -119,8 +119,8 @@ class DemoMainTest {
         // Verify updated priority
         Task after = testRegistry.get("Refactor code");
         assertNotNull(after, "Task should still exist after update");
-        assertEquals(Priority.HIGH, after.getPriority(), "Priority should be updated to HIGH");
-        assertEquals("Refactor code", after.getName(), "Task name should remain unchanged");
+        assertEquals(Priority.HIGH, after.priority(), "Priority should be updated to HIGH");
+        assertEquals("Refactor code", after.name(), "Task name should remain unchanged");
     }
 
     @Test
@@ -239,7 +239,7 @@ class DemoMainTest {
 
         Task updated = testRegistry.get("Test task");
         assertNotNull(updated, "Task should still exist after update");
-        assertEquals(Priority.HIGH, updated.getPriority(), "Priority should be updated");
+        assertEquals(Priority.HIGH, updated.priority(), "Priority should be updated");
     }
 
     @Test
@@ -276,7 +276,7 @@ class DemoMainTest {
         manager.run(new UpdateTaskCommand(testRegistry, "Test task", Priority.HIGH));
 
         Task updated = testRegistry.get("Test task");
-        assertEquals(Priority.HIGH, updated.getPriority(), "Priority should be updated via TaskManager.run()");
+        assertEquals(Priority.HIGH, updated.priority(), "Priority should be updated via TaskManager.run()");
     }
 }
 

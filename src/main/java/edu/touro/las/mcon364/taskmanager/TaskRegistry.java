@@ -7,7 +7,7 @@ public class TaskRegistry {
     private final Map<String, Task> tasks = new HashMap<>();
 
     public void add(Task task) {
-        tasks.put(task.getName(), task);
+        tasks.put(task.name(), task);
     }
 
     public Task get(String name) {
