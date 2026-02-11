@@ -16,7 +16,6 @@ public class TaskManager {
         this.registry = registry;
     }
 
-
     // implemented with pattern-matching switch
     public void run(Command command) {
         switch (command) {
