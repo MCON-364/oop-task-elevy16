@@ -1,6 +1,6 @@
 package edu.touro.las.mcon364.taskmanager;
 
-public class UpdateTaskCommand implements Command {
+public final class UpdateTaskCommand implements Command {
     private final TaskRegistry registry;
     private final String taskName;
     private final Priority newPriority;
