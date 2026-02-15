@@ -4,6 +4,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -26,8 +28,10 @@ class CommandTest {
 
         command.execute();
 
-        assertNotNull(registry.get("New task"), "Task should be in registry after AddTaskCommand");
-        assertEquals(task, registry.get("New task"), "Added task should match");
+        Optional<Task> newTaskOptional = registry.get("New task");
+        assertTrue(newTaskOptional.isPresent(), "Task should be in registry after AddTaskCommand");
+        Task newTask = newTaskOptional.get();
+        assertEquals(task, newTask, "Added task should match");
     }
 
     @Test
@@ -39,7 +43,11 @@ class CommandTest {
         new AddTaskCommand(registry, originalTask).execute();
         new AddTaskCommand(registry, replacementTask).execute();
 
-        assertEquals(Priority.HIGH, registry.get("Task").priority(),
+        // get and unwrap optional
+        Optional<Task> taskOptional = registry.get("Task");
+        Task task = taskOptional.get();
+
+        assertEquals(Priority.HIGH, task.priority(),
                 "Replacement task should have new priority");
     }
 
@@ -51,7 +59,8 @@ class CommandTest {
         Command command = new RemoveTaskCommand(registry, "To be removed");
         command.execute();
 
-        assertNull(registry.get("To be removed"), "Task should be removed from registry");
+        Optional<Task> removedOptional = registry.get("To be removed");
+        assertTrue(removedOptional.isEmpty(), "Task should be removed from registry");
     }
 
     @Test
@@ -71,8 +80,11 @@ class CommandTest {
         Command command = new UpdateTaskCommand(registry, "Update me", Priority.HIGH);
         command.execute();
 
-        Task updated = registry.get("Update me");
-        assertNotNull(updated, "Task should still exist after update");
+        Optional<Task> updatedOptional = registry.get("Update me");
+        assertTrue(updatedOptional.isPresent(), "Task should still exist after update");
+
+        // unwrap optional
+        Task updated = updatedOptional.get();
         assertEquals(Priority.HIGH, updated.priority(), "Priority should be updated to HIGH");
     }
 
@@ -84,7 +96,10 @@ class CommandTest {
         Command command = new UpdateTaskCommand(registry, "Important task", Priority.LOW);
         command.execute();
 
-        Task updated = registry.get("Important task");
+        // get and unwrap optional
+        Optional<Task> updatedOptional = registry.get("Important task");
+        Task updated = updatedOptional.get();
+
         assertEquals("Important task", updated.name(), "Task name should be preserved");
     }
 
@@ -94,11 +109,13 @@ class CommandTest {
         Command command = new UpdateTaskCommand(registry, "Non-existent", Priority.HIGH);
 
         // Pre-refactor: this should not throw, just print a warning
-        assertDoesNotThrow(command::execute,
+        assertThrows(TaskNotFoundException.class, command::execute,
                 "Updating non-existent task should not throw (before custom exception refactoring)");
 
         // Task should not be created
-        assertNull(registry.get("Non-existent"),
+        // get optional
+        Optional<Task> updateOptional = registry.get("Non-existent");
+        assertTrue(updateOptional.isEmpty(),
                 "Non-existent task should not be created by update");
     }
 
@@ -109,7 +126,11 @@ class CommandTest {
 
         new UpdateTaskCommand(registry, "Flexible", Priority.LOW).execute();
 
-        assertEquals(Priority.LOW, registry.get("Flexible").priority(),
+        // get and unwrap optional
+        Optional<Task> updatedOptional = registry.get("Flexible");
+        Task  updated = updatedOptional.get();
+
+        assertEquals(Priority.LOW, updated.priority(),
                 "Should allow decreasing priority");
     }
 
@@ -120,7 +141,11 @@ class CommandTest {
 
         new UpdateTaskCommand(registry, "Urgent", Priority.HIGH).execute();
 
-        assertEquals(Priority.HIGH, registry.get("Urgent").priority(),
+        // get and unwrap optional
+        Optional<Task> updatedOptional = registry.get("Urgent");
+        Task  updated = updatedOptional.get();
+
+        assertEquals(Priority.HIGH, updated.priority(),
                 "Should allow increasing priority");
     }
 }

@@ -4,6 +4,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -23,9 +25,11 @@ class TaskRegistryTest {
         Task task = new Task("Test task", Priority.HIGH);
         registry.add(task);
 
-        Task retrieved = registry.get("Test task");
-        assertNotNull(retrieved, "Added task should be retrievable");
-        assertEquals(task, retrieved, "Retrieved task should equal added task");
+        // get optional
+        Optional<Task> retrievedOptional = registry.get("Test task");
+
+        assertTrue(retrievedOptional.isPresent(), "Added task should be retrievable");
+        assertEquals(task, retrievedOptional.get(), "Retrieved task should equal added task");
     }
 
     @Test
@@ -37,15 +41,18 @@ class TaskRegistryTest {
         registry.add(task1);
         registry.add(task2);
 
-        Task retrieved = registry.get("Test task");
+        Optional<Task> retrievedOptional = registry.get("Test task");
+        // unwrap optional
+        Task retrieved = retrievedOptional.get();
         assertEquals(Priority.HIGH, retrieved.priority(), "Second task should replace first");
     }
 
     @Test
     @DisplayName("Getting non-existent task should return null")
     void testGetNonExistent() {
-        Task result = registry.get("Non-existent");
-        assertNull(result, "Non-existent task should return null (before Optional refactoring)");
+        Optional<Task> resultOptional = registry.get("Non-existent");
+
+        assertTrue(resultOptional.isEmpty(), "Getting non-existent task should return empty optional.");
     }
 
     @Test
@@ -56,7 +63,8 @@ class TaskRegistryTest {
 
         registry.remove("Test task");
 
-        assertNull(registry.get("Test task"), "Removed task should not be retrievable");
+        Optional<Task> taskOptional = registry.get("Test task");
+        assertTrue(taskOptional.isEmpty(), "Removed task should not be retrievable");
     }
 
     @Test
