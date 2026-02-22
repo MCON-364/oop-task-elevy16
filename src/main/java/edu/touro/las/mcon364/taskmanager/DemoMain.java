@@ -1,5 +1,7 @@
 package edu.touro.las.mcon364.taskmanager;
 
+import java.util.Optional;
+
 public class DemoMain {
     private final TaskRegistry registry;
     private final TaskManager manager;
@@ -40,9 +42,10 @@ public class DemoMain {
 
     private void demonstrateRetrievingTask() {
         System.out.println("\n2. Retrieving a specific task...");
-        Task retrieved = registry.get("Fix critical bug");
-        if (retrieved != null) {
-            System.out.println("   Found: " + retrieved.getName() + " (Priority: " + retrieved.getPriority() + ")");
+        Optional<Task> retrieved = registry.get("Fix critical bug");
+        if (retrieved.isPresent()) {
+            Task task = retrieved.get(); // unwrap optional
+            System.out.println("   Found: " + task.name() + " (Priority: " + task.priority() + ")");
         } else {
             System.out.println("   Task not found");
         }
@@ -70,7 +73,7 @@ public class DemoMain {
 
     private void demonstrateNullReturn() {
         System.out.println("\n6. Attempting to retrieve non-existent task...");
-        Task missing = registry.get("Non-existent task");
+        Optional<Task> missing = registry.get("Non-existent task");
         if (missing == null) {
             System.out.println("   Returned null - this should be refactored to use Optional!");
         }
@@ -90,7 +93,7 @@ public class DemoMain {
     private void displayAllTasks() {
         System.out.println("\n   Current tasks in registry:");
         registry.getAll().forEach((name, task) ->
-            System.out.println("     - " + name + " (Priority: " + task.getPriority() + ")")
+            System.out.println("     - " + name + " (Priority: " + task.priority() + ")")
         );
     }
 }

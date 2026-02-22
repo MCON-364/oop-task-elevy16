@@ -4,6 +4,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -39,7 +41,8 @@ class TaskManagerTest {
 
         manager.run(command);
 
-        assertNull(registry.get("Remove me"), "Task should be removed");
+        Optional<Task>  removeOptional = registry.get("Remove me");
+        assertTrue(removeOptional.isEmpty(), "Task should be removed");
     }
 
     @Test
@@ -50,7 +53,11 @@ class TaskManagerTest {
 
         manager.run(command);
 
-        assertEquals(Priority.HIGH, registry.get("Update me").getPriority(),
+        // get the optional and unwrap it
+        Optional<Task> taskOptional = registry.get("Update me");
+        Task task = taskOptional.get();
+
+        assertEquals(Priority.HIGH, task.priority(),
                 "Task priority should be updated");
     }
 
@@ -62,9 +69,15 @@ class TaskManagerTest {
         manager.run(new UpdateTaskCommand(registry, "Task 2", Priority.MEDIUM));
         manager.run(new RemoveTaskCommand(registry, "Task 1"));
 
-        assertNull(registry.get("Task 1"), "Task 1 should be removed");
-        assertNotNull(registry.get("Task 2"), "Task 2 should still exist");
-        assertEquals(Priority.MEDIUM, registry.get("Task 2").getPriority(),
+        // get the optional and unwrap it
+        Optional<Task> taskOptional1 = registry.get("Task 1");
+        Optional<Task> taskOptional2 = registry.get("Task 2");
+
+        assertTrue(taskOptional1.isEmpty(), "Task 1 should be removed");
+        assertTrue(taskOptional2.isPresent(), "Task 2 should still exist");
+
+        Task task2 = taskOptional2.get(); // unwrap optional
+        assertEquals(Priority.MEDIUM, task2.priority(),
                 "Task 2 priority should be updated");
     }
 

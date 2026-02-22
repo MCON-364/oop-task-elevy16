@@ -1,17 +1,16 @@
 package edu.touro.las.mcon364.taskmanager;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class TaskRegistry {
     private final Map<String, Task> tasks = new HashMap<>();
 
     public void add(Task task) {
-        tasks.put(task.getName(), task);
+        tasks.put(task.name(), task);
     }
 
-    public Task get(String name) {
-        return tasks.get(name);
+    public Optional<Task> get(String name) {
+        return Optional.ofNullable(tasks.get(name));
     }
 
     public void remove(String name) {
@@ -20,5 +19,24 @@ public class TaskRegistry {
 
     public Map<String, Task> getAll() {
         return tasks;
+    }
+
+    public void clear() {
+        tasks.clear();
+    }
+
+    public Map<Priority, List<Task>> getTasksByPriority() {
+        Map<Priority, List<Task>> tasksByPriority = new HashMap<>();
+
+        for (Task task : tasks.values()) {
+            Priority priority = task.priority();
+
+
+            // get the list or create a new one if it doesn't exist
+            tasksByPriority
+                    .computeIfAbsent(priority, k -> new ArrayList<>())
+                    .add(task);
+        }
+        return tasksByPriority;
     }
 }

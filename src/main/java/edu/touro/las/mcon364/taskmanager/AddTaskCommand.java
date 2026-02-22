@@ -1,6 +1,6 @@
 package edu.touro.las.mcon364.taskmanager;
 
-public class AddTaskCommand implements Command {
+public final class AddTaskCommand implements Command {
     private final TaskRegistry registry;
     private final Task task;
 
@@ -10,6 +10,12 @@ public class AddTaskCommand implements Command {
     }
 
     public void execute() {
+        // Check if task already exists
+        if (registry.get(task.name()).isPresent()) {
+            throw new TaskAlreadyExistsException("Warning: Task already exists.");
+        }
+
+        // add task
         registry.add(task);
     }
 }

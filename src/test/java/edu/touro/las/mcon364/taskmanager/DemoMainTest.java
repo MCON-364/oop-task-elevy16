@@ -6,6 +6,7 @@ import org.junit.jupiter.api.DisplayName;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -49,25 +50,30 @@ class DemoMainTest {
         assertEquals(5, testRegistry.getAll().size(), "Should have 5 tasks");
 
         // Verify specific tasks exist with correct priorities
-        Task doc = testRegistry.get("Write documentation");
-        assertNotNull(doc, "Write documentation task should exist");
-        assertEquals(Priority.HIGH, doc.getPriority(), "Write documentation should be HIGH priority");
+        Optional<Task> docOptional = testRegistry.get("Write documentation");
+        assertTrue(docOptional.isPresent(), "Write documentation task should exist");
+        Task doc = docOptional.get();
+        assertEquals(Priority.HIGH, doc.priority(), "Write documentation should be HIGH priority");
 
-        Task review = testRegistry.get("Review pull requests");
-        assertNotNull(review, "Review pull requests task should exist");
-        assertEquals(Priority.MEDIUM, review.getPriority(), "Review pull requests should be MEDIUM priority");
+        Optional<Task> reviewOptional = testRegistry.get("Review pull requests");
+        assertTrue(reviewOptional.isPresent(), "Review pull requests task should exist");
+        Task review = reviewOptional.get();
+        assertEquals(Priority.MEDIUM, review.priority(), "Review pull requests should be MEDIUM priority");
 
-        Task dependencies = testRegistry.get("Update dependencies");
-        assertNotNull(dependencies, "Update dependencies task should exist");
-        assertEquals(Priority.LOW, dependencies.getPriority(), "Update dependencies should be LOW priority");
+        Optional<Task> dependenciesOptional = testRegistry.get("Update dependencies");
+        assertTrue(dependenciesOptional.isPresent(), "Update dependencies task should exist");
+        Task dependencies = dependenciesOptional.get();
+        assertEquals(Priority.LOW, dependencies.priority(), "Update dependencies should be LOW priority");
 
-        Task bug = testRegistry.get("Fix critical bug");
-        assertNotNull(bug, "Fix critical bug task should exist");
-        assertEquals(Priority.HIGH, bug.getPriority(), "Fix critical bug should be HIGH priority");
+        Optional<Task> bugOptional = testRegistry.get("Fix critical bug");
+        assertTrue(bugOptional.isPresent(), "Fix critical bug task should exist");
+        Task bug =  bugOptional.get();
+        assertEquals(Priority.HIGH, bug.priority(), "Fix critical bug should be HIGH priority");
 
-        Task refactor = testRegistry.get("Refactor code");
-        assertNotNull(refactor, "Refactor code task should exist");
-        assertEquals(Priority.MEDIUM, refactor.getPriority(), "Refactor code should be MEDIUM priority");
+        Optional<Task> refactorOptional = testRegistry.get("Refactor code");
+        assertTrue(refactorOptional.isPresent(), "Refactor code task should exist");
+        Task refactor = refactorOptional.get();
+        assertEquals(Priority.MEDIUM, refactor.priority(), "Refactor code should be MEDIUM priority");
     }
 
     @Test
@@ -80,13 +86,14 @@ class DemoMainTest {
         Task expectedTask = new Task("Fix critical bug", Priority.HIGH);
         testManager.run(new AddTaskCommand(testRegistry, expectedTask));
 
-        // Retrieve it
-        Task retrieved = testRegistry.get("Fix critical bug");
+        // get optional and verify
+        Optional<Task> retrievedOptional = testRegistry.get("Fix critical bug");
+        assertTrue(retrievedOptional.isPresent(), "Retrieved task should not be null");
 
-        // Verify
-        assertNotNull(retrieved, "Retrieved task should not be null");
-        assertEquals("Fix critical bug", retrieved.getName(), "Task name should match");
-        assertEquals(Priority.HIGH, retrieved.getPriority(), "Task priority should match");
+        // unwrap optional and verify
+        Task retrieved = retrievedOptional.get();
+        assertEquals("Fix critical bug", retrieved.name(), "Task name should match");
+        assertEquals(Priority.HIGH, retrieved.priority(), "Task priority should match");
         assertEquals(expectedTask, retrieved, "Retrieved task should equal the added task");
     }
 
@@ -95,9 +102,9 @@ class DemoMainTest {
     void testDemonstrateRetrievingNonExistentTask() {
         TaskRegistry testRegistry = new TaskRegistry();
 
-        Task missing = testRegistry.get("Non-existent task");
+        Optional<Task> missingOptional = testRegistry.get("Non-existent task");
 
-        assertNull(missing, "Non-existent task should return null (before Optional refactoring)");
+        assertTrue(missingOptional.isEmpty(), "Non-existent task should return null (before Optional refactoring)");
     }
 
     @Test
@@ -110,17 +117,19 @@ class DemoMainTest {
         testManager.run(new AddTaskCommand(testRegistry, new Task("Refactor code", Priority.MEDIUM)));
 
         // Verify original priority
-        Task before = testRegistry.get("Refactor code");
-        assertEquals(Priority.MEDIUM, before.getPriority(), "Initial priority should be MEDIUM");
+        Optional<Task> beforeOptional = testRegistry.get("Refactor code");
+        Task before = beforeOptional.get();
+        assertEquals(Priority.MEDIUM, before.priority(), "Initial priority should be MEDIUM");
 
         // Update to HIGH priority
         testManager.run(new UpdateTaskCommand(testRegistry, "Refactor code", Priority.HIGH));
 
         // Verify updated priority
-        Task after = testRegistry.get("Refactor code");
-        assertNotNull(after, "Task should still exist after update");
-        assertEquals(Priority.HIGH, after.getPriority(), "Priority should be updated to HIGH");
-        assertEquals("Refactor code", after.getName(), "Task name should remain unchanged");
+        Optional<Task> afterOptional = testRegistry.get("Refactor code");
+        assertTrue(afterOptional.isPresent(), "Task should still exist after update");
+        Task after = afterOptional.get();
+        assertEquals(Priority.HIGH, after.priority(), "Priority should be updated to HIGH");
+        assertEquals("Refactor code", after.name(), "Task name should remain unchanged");
     }
 
     @Test
@@ -129,14 +138,9 @@ class DemoMainTest {
         TaskRegistry testRegistry = new TaskRegistry();
         TaskManager testManager = new TaskManager(testRegistry);
 
-        // This should NOT throw an exception in the pre-refactor version
-        // It silently fails with a warning message
-        assertDoesNotThrow(() -> {
+        assertThrows(TaskNotFoundException.class, () -> {
             testManager.run(new UpdateTaskCommand(testRegistry, "Non-existent task", Priority.HIGH));
-        }, "Updating non-existent task should not throw (before custom exception refactoring)");
-
-        // Verify task was not created
-        assertNull(testRegistry.get("Non-existent task"), "Non-existent task should not be created");
+        }, "Updating non-existent task should throw TaskNotFoundException");
     }
 
     @Test
@@ -149,16 +153,22 @@ class DemoMainTest {
         testManager.run(new AddTaskCommand(testRegistry, new Task("Update dependencies", Priority.LOW)));
         testManager.run(new AddTaskCommand(testRegistry, new Task("Fix critical bug", Priority.HIGH)));
 
+        Optional<Task> removeOptional  = testRegistry.get("Update dependencies");
+        assertTrue(removeOptional.isPresent(), "Update dependencies should exist.");
         assertEquals(2, testRegistry.getAll().size(), "Should have 2 tasks initially");
-        assertNotNull(testRegistry.get("Update dependencies"), "Update dependencies should exist");
 
         // Remove one task
         testManager.run(new RemoveTaskCommand(testRegistry, "Update dependencies"));
 
         // Verify removal
         assertEquals(1, testRegistry.getAll().size(), "Should have 1 task after removal");
-        assertNull(testRegistry.get("Update dependencies"), "Update dependencies should be removed");
-        assertNotNull(testRegistry.get("Fix critical bug"), "Fix critical bug should still exist");
+
+        // verify removed task is gone
+        Optional<Task> removedOptional =  testRegistry.get("Update dependencies");
+        assertTrue(removedOptional.isEmpty(), "Update dependencies should be removed");
+        // verify remaining task exists
+        Optional<Task> remainingOptional = testRegistry.get("Fix critical bug");
+        assertNotNull(remainingOptional.isPresent(), "Fix critical bug should still exist");
     }
 
     @Test
@@ -167,10 +177,10 @@ class DemoMainTest {
         TaskRegistry testRegistry = new TaskRegistry();
 
         // Attempt to get non-existent task
-        Task missing = testRegistry.get("Non-existent task");
+        Optional<Task> missingOptional = testRegistry.get("Non-existent task");
 
         // Verify it returns null (this is what needs to be refactored to Optional)
-        assertNull(missing, "Getting non-existent task should return null (before Optional refactoring)");
+        assertTrue(missingOptional.isEmpty(), "Getting non-existent task should be empty.");
     }
 
     @Test
@@ -179,7 +189,7 @@ class DemoMainTest {
         DemoMain testDemo = new DemoMain();
 
         // The full demo should run without throwing any exceptions
-        assertDoesNotThrow(() -> {
+        assertThrows(TaskNotFoundException.class, () -> {
             testDemo.run();
         }, "Full demo should run without exceptions");
     }
@@ -212,8 +222,10 @@ class DemoMainTest {
         AddTaskCommand command = new AddTaskCommand(testRegistry, task);
         command.execute();
 
-        assertNotNull(testRegistry.get("Test task"), "Task should be added after command execution");
-        assertEquals(task, testRegistry.get("Test task"), "Added task should match original");
+        Optional<Task> addTaskOptional = testRegistry.get("Test task");
+        assertTrue(addTaskOptional.isPresent(), "Task should be added after command execution");
+        Task addTask = addTaskOptional.get();
+        assertEquals(task, addTask, "Added task should match original");
     }
 
     @Test
@@ -225,7 +237,8 @@ class DemoMainTest {
         RemoveTaskCommand command = new RemoveTaskCommand(testRegistry, "Test task");
         command.execute();
 
-        assertNull(testRegistry.get("Test task"), "Task should be removed after command execution");
+        Optional<Task> removeTaskOptional = testRegistry.get("Test task");
+        assertTrue(removeTaskOptional.isEmpty(), "Task should be removed after command execution");
     }
 
     @Test
@@ -237,9 +250,10 @@ class DemoMainTest {
         UpdateTaskCommand command = new UpdateTaskCommand(testRegistry, "Test task", Priority.HIGH);
         command.execute();
 
-        Task updated = testRegistry.get("Test task");
-        assertNotNull(updated, "Task should still exist after update");
-        assertEquals(Priority.HIGH, updated.getPriority(), "Priority should be updated");
+        Optional<Task> updatedOptional = testRegistry.get("Test task");
+        assertTrue(updatedOptional.isPresent(), "Task should still exist after update");
+        Task updated = updatedOptional.get();
+        assertEquals(Priority.HIGH, updated.priority(), "Priority should be updated");
     }
 
     @Test
@@ -263,7 +277,8 @@ class DemoMainTest {
 
         manager.run(new RemoveTaskCommand(testRegistry, "Test task"));
 
-        assertNull(testRegistry.get("Test task"), "Task should be removed via TaskManager.run()");
+        Optional<Task> testOptional = testRegistry.get("Test task");
+        assertTrue(testOptional.isEmpty(), "Task should be removed via TaskManager.run()");
     }
 
     @Test
@@ -275,8 +290,9 @@ class DemoMainTest {
 
         manager.run(new UpdateTaskCommand(testRegistry, "Test task", Priority.HIGH));
 
-        Task updated = testRegistry.get("Test task");
-        assertEquals(Priority.HIGH, updated.getPriority(), "Priority should be updated via TaskManager.run()");
+        Optional<Task> updatedOptional = testRegistry.get("Test task");
+        Task updated = updatedOptional.get();
+        assertEquals(Priority.HIGH, updated.priority(), "Priority should be updated via TaskManager.run()");
     }
 }
 
