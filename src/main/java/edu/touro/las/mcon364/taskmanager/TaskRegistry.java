@@ -19,9 +19,7 @@ public class TaskRegistry {
         tasks.remove(name);
     }
 
-    public Map<String, Task> getAll() {
-        return tasks;
-    }
+    public Map<String, Task> getAll() { return tasks; }
 
     public void clear() { tasks.clear(); }
 }

@@ -10,6 +10,11 @@ public final class RemoveTaskCommand implements Command {
     }
 
     public void execute() {
+        // check if task exists
+        Task existing = registry.get(name)
+                        .orElseThrow(() -> new TaskNotFoundException("Warning: cannot remove because task not found."));
+
+        // remove task
         registry.remove(name);
     }
 }

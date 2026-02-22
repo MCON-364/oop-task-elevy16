@@ -38,17 +38,15 @@ class CommandTest {
     @DisplayName("AddTaskCommand should replace existing task with same name")
     void testAddTaskCommandReplacement() {
         Task originalTask = new Task("Task", Priority.LOW);
-        Task replacementTask = new Task("Task", Priority.HIGH);
+        Task duplicateTask = new Task("Task", Priority.HIGH);
 
         new AddTaskCommand(registry, originalTask).execute();
-        new AddTaskCommand(registry, replacementTask).execute();
 
-        // get and unwrap optional
-        Optional<Task> taskOptional = registry.get("Task");
-        Task task = taskOptional.get();
+        // adding duplicate task should throw
+        assertThrows(TaskAlreadyExistsException.class, () -> {
+            new AddTaskCommand(registry, duplicateTask).execute();
+        }, "Adding duplicate task should throw exception");
 
-        assertEquals(Priority.HIGH, task.priority(),
-                "Replacement task should have new priority");
     }
 
     @Test
@@ -64,12 +62,13 @@ class CommandTest {
     }
 
     @Test
-    @DisplayName("RemoveTaskCommand on non-existent task should not throw")
+    @DisplayName("RemoveTaskCommand on non-existent task should throw TaskNotFoundException")
     void testRemoveTaskCommandNonExistent() {
         Command command = new RemoveTaskCommand(registry, "Non-existent");
 
-        assertDoesNotThrow(command::execute,
-                "Removing non-existent task should not throw exception");
+        assertThrows(TaskNotFoundException.class, () -> {
+            command.execute();
+        }, "Removing non-existent task should throw TaskNotFoundException");
     }
 
     @Test

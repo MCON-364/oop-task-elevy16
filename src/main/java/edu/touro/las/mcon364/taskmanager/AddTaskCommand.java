@@ -10,6 +10,12 @@ public final class AddTaskCommand implements Command {
     }
 
     public void execute() {
+        // Check if task already exists
+        if (registry.get(task.name()).isPresent()) {
+            throw new TaskAlreadyExistsException("Warning: Task already exists.");
+        }
+
+        // add task
         registry.add(task);
     }
 }
