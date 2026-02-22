@@ -22,4 +22,6 @@ public class TaskRegistry {
     public Map<String, Task> getAll() {
         return tasks;
     }
+
+    public void clear() { tasks.clear(); }
 }
